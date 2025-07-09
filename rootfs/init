@@ -1,0 +1,33 @@
+#!/bin/busybox sh
+
+echo "=== Init script started ==="
+date
+
+# 设置库路径
+export LD_LIBRARY_PATH=/lib
+echo "LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
+
+# 挂载文件系统
+echo "Mounting filesystems..."
+/bin/busybox mount -t proc none /proc
+/bin/busybox mount -t sysfs none /sys
+/bin/busybox mount -t tmpfs none /tmp
+/bin/busybox mount -t devtmpfs none /dev
+
+# 显示挂载结果
+echo "Mounted filesystems:"
+/bin/busybox mount
+
+# 创建设备节点
+echo "Creating device nodes..."
+/bin/busybox rm -f /dev/null /dev/console
+/bin/busybox mknod -m 666 /dev/null c 1 3
+/bin/busybox mknod -m 600 /dev/console c 5 1
+
+# 显示可用设备
+echo "Available devices:"
+/bin/busybox ls -l /dev
+
+# 启动shell
+echo "Starting shell on /dev/console..."
+exec /bin/busybox ash --login > /dev/console 2>&1
